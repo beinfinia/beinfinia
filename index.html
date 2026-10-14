@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>infinia</title>
+
+    <!--
+      Meta Pixel (Facebook Pixel)
+      ============================================================
+      SUSTITUIR: cambia TU_PIXEL_ID por tu número real (lo consigues en
+      Meta Events Manager). El script va en el <head> para cargar antes
+      que la app. El <noscript> va en el <body> (más abajo) porque un
+      <img> no es contenido válido dentro de <noscript> cuando está en
+      el <head> — Vite lo valida estrictamente y da error si lo dejas ahí.
+      ============================================================
+    -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', 'TU_PIXEL_ID');
+      fbq('track', 'PageView');
+    </script>
+    <!-- Fin script del Meta Pixel -->
+
+  </head>
+  <body>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=TU_PIXEL_ID&ev=PageView&noscript=1"
+      />
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
