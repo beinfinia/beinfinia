@@ -6,7 +6,7 @@ import './InfiniaLanding.css';
 
 const EMAIL = 'hola@beinfinia.com';
 const INSTAGRAM_URL = 'https://www.instagram.com/beinfinia_/';
-const waLink = (message = 'Hola infinia, quiero una propuesta de marketing digital para mi negocio.') => 'https://wa.me/50581820910?text=' + encodeURIComponent(message);
+const waLink = (message = 'Hola infinia, quiero una propuesta de marketing digital para mi negocio.') => 'https://wa.me/50581820910?text=' + encodeURIComponent(message + '\n\n¿A qué se dedica tu negocio?\nRespuesta: \n\n¿Qué te gustaría lograr?\nRespuesta: ');
 function trackContact(name) { if (typeof window.fbq === 'function') window.fbq('track', 'Contact', { content_name: name }); }
 const plans = [
   {
