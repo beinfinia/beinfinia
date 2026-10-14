@@ -64,7 +64,7 @@ const services = [
   { icon: BarChart3, title: 'Claridad para avanzar', text: 'Calendario, seguimiento y reportes mensuales para entender lo que funciona y orientar el siguiente paso.', tag: '04 / Seguimiento' }
 ];
 const faqs = [
-  { q: '¿Con qué negocios trabajan?', a: 'Nos enfocamos en negocios y emprendedores latinos en Estados Unidos que necesitan estrategia, contenido y gestión de publicidad en español.' },
+  { q: '¿Con qué negocios trabajan?', a: 'Nos enfocamos en negocios y emprendedores que necesitan estrategia, contenido y gestión de publicidad en español.' },
   { q: '¿Cuánto cuesta el servicio?', a: 'La inversión se define según el plan y los objetivos de tu negocio. Solicita una propuesta para conocer el alcance y el precio antes de comenzar.' },
   { q: '¿El presupuesto de anuncios está incluido?', a: 'La propuesta detalla por separado el alcance de la gestión y el presupuesto recomendado para anuncios, para que conozcas la inversión antes de aprobarla.' },
   { q: '¿En cuánto tiempo se ven resultados?', a: 'Depende del punto de partida, la oferta, el mercado y la inversión. Revisamos el desempeño mes a mes; no prometemos una cantidad fija de ventas.' },
@@ -76,16 +76,16 @@ function Label({ children }) { return <span className="inf-label"><span aria-hid
 
 export default function InfiniaLanding() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const schema = { '@context': 'https://schema.org', '@type': 'Organization', '@id': 'https://www.beinfinia.com/#organization', name: 'infinia', url: 'https://www.beinfinia.com/', logo: 'https://www.beinfinia.com/infinia-icon.png', email: EMAIL, telephone: '+50581820910', sameAs: [INSTAGRAM_URL], areaServed: { '@type': 'Country', name: 'United States' }, description: 'Marketing digital en español para negocios latinos en Estados Unidos.' };
+  const schema = { '@context': 'https://schema.org', '@type': 'Organization', '@id': 'https://www.beinfinia.com/#organization', name: 'infinia', url: 'https://www.beinfinia.com/', logo: 'https://www.beinfinia.com/infinia-icon.png', email: EMAIL, telephone: '+50581820910', sameAs: [INSTAGRAM_URL], description: 'Marketing digital en español para negocios y emprendedores.' };
   return <div className="inf-root">
     <Helmet>
-      <title>Marketing digital para negocios latinos en EE. UU. | infinia</title>
-      <meta name="description" content="Estrategia, contenido, gestión de redes sociales y Meta Ads para negocios latinos en Estados Unidos. Conoce los paquetes de infinia y solicita tu propuesta." />
+      <title>Marketing digital para negocios y emprendedores | infinia</title>
+      <meta name="description" content="Estrategia, contenido, gestión de redes sociales y Meta Ads para negocios y emprendedores. Conoce los paquetes de infinia y solicita tu propuesta." />
       <meta name="robots" content="index, follow" />
       <link rel="canonical" href="https://www.beinfinia.com/" />
-      <meta property="og:type" content="website" /><meta property="og:site_name" content="infinia" /><meta property="og:locale" content="es_US" />
+      <meta property="og:type" content="website" /><meta property="og:site_name" content="infinia" />
       <meta property="og:url" content="https://www.beinfinia.com/" /><meta property="og:title" content="Tu marca, con otra dimensión. | infinia" />
-      <meta property="og:description" content="Estrategia, contenido y publicidad para negocios latinos en Estados Unidos. Hablemos de tu próximo paso." />
+      <meta property="og:description" content="Estrategia, contenido y publicidad para negocios y emprendedores. Hablemos de tu próximo paso." />
       <meta property="og:image" content="https://www.beinfinia.com/infinia-icon.png" /><meta property="og:image:alt" content="Identidad de infinia" />
       <meta name="twitter:card" content="summary" /><meta name="twitter:image" content="https://www.beinfinia.com/infinia-icon.png" />
       <script type="application/ld+json">{JSON.stringify(schema)}</script>
@@ -103,9 +103,9 @@ export default function InfiniaLanding() {
       <section className="inf-hero" aria-labelledby="hero-title">
         <div className="inf-aurora" aria-hidden="true" />
         <div className="inf-container inf-hero-layout">
-          <div className="inf-hero-copy"><Label>Marketing digital en español · EE. UU.</Label>
+          <div className="inf-hero-copy"><Label>Marketing digital en español</Label>
             <h1 id="hero-title">Tu marca,<br />con otra <span>dimensión.</span></h1>
-            <p className="inf-hero-sub">Estrategia, contenido y publicidad para negocios latinos en Estados Unidos. Una presencia digital con identidad y un plan para crecer.</p>
+            <p className="inf-hero-sub">Estrategia, contenido y publicidad para negocios y emprendedores. Una presencia digital con identidad y un plan para crecer.</p>
             <div className="inf-actions"><Contact className="inf-btn inf-btn-lime" name="Hero">Construyamos tu próximo paso <ArrowUpRight size={19} /></Contact><a className="inf-text-link" href="#planes">Explorar paquetes <ArrowRight size={17} /></a></div>
             <div className="inf-hero-note"><span /><span>Estrategia a tu medida. Trato directo, en español.</span></div>
           </div>
