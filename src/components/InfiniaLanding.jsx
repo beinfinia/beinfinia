@@ -95,7 +95,7 @@ export default function InfiniaLanding() {
       <a className="inf-brand" href="/" aria-label="infinia, inicio"><img src="/infinia-icon.png" width="36" height="36" alt="" />infinia<span className="inf-brand-dot">✦</span></a>
       <button className="inf-menu-toggle" type="button" aria-controls="inf-menu" aria-expanded={menuOpen} aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button>
       <nav id="inf-menu" className={'inf-menu ' + (menuOpen ? 'is-open' : '')} aria-label="Navegación principal" onClick={() => setMenuOpen(false)}>
-        <a href="#servicios">Servicios</a><a href="#proceso">Proceso</a><a href="#planes">Paquetes</a><a href="#preguntas">Preguntas</a>
+        <a href="#servicios">Servicios</a><a href="#proceso">Proceso</a><a href="#planes">Paquetes</a><a href="#preguntas">Preguntas</a><Link to="/cita">Agendar cita</Link>
         <Contact className="inf-nav-cta" name="Navegación">Hablemos <ArrowUpRight size={16} /></Contact>
       </nav>
     </div></header>
@@ -106,7 +106,7 @@ export default function InfiniaLanding() {
           <div className="inf-hero-copy"><Label>Marketing digital en español</Label>
             <h1 id="hero-title">Tu marca,<br />con otra <span>dimensión.</span></h1>
             <p className="inf-hero-sub">Estrategia, contenido y publicidad para negocios y emprendedores. Una presencia digital con identidad y un plan para crecer.</p>
-            <div className="inf-actions"><Contact className="inf-btn inf-btn-lime" name="Hero">Construyamos tu próximo paso <ArrowUpRight size={19} /></Contact><a className="inf-text-link" href="#planes">Explorar paquetes <ArrowRight size={17} /></a></div>
+            <div className="inf-actions"><Contact className="inf-btn inf-btn-lime" name="Hero">Construyamos tu próximo paso <ArrowUpRight size={19} /></Contact><Link className="inf-text-link" to="/cita">Agendar una conversación <Calendar size={17} /></Link></div>
             <div className="inf-hero-note"><span /><span>Estrategia a tu medida. Trato directo, en español.</span></div>
           </div>
           <div className="inf-scene" aria-label="Estrategia, contenido y publicidad conectados en una sola dirección">
@@ -142,3 +142,4 @@ export default function InfiniaLanding() {
     <Contact className="inf-floating" name="WhatsApp flotante"><MessageCircle size={23} /><span className="inf-sr-only">Contactar por WhatsApp</span></Contact>
   </div>;
 }
+
