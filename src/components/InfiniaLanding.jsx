@@ -93,7 +93,7 @@ function BrandSpark({ size = 14, className }) {
 
 const WHATSAPP_NUMBER = '50581820910'; // +505 8182 0910, formato internacional sin espacios ni +
 const EMAIL = 'hola@beinfinia.com';
-const INSTAGRAM_URL = 'https://www.instagram.com/beinfinia/';
+const INSTAGRAM_URL = 'https://www.instagram.com/beinfinia_/';
 // Nota: el enlace de Facebook que pegaste apuntaba a la URL de Instagram
 // (probablemente un copiar/pegar cruzado). Usé la URL real de Facebook
 // que coincide con tu usuario — verifica que sea la correcta.
