@@ -5,7 +5,7 @@ import './InfiniaOps.css';
 import {AnalyticsPanel} from './AnalyticsPanel';
 import {BlogEditor} from './BlogEditor';
 const stages=['Nuevo','Contactado','Cita agendada','Propuesta enviada','Ganado','Perdido'];
-const services=['Campañas Meta Ads','Paquete Captación','Paquete Conversión','Paquete Seguimiento','Landing o sitio web','Google Business Profile','Otro servicio'];
+const services=['Campañas Meta Ads','Plan Esencial','Plan Profesional','Contenido para redes','Landing o sitio web','Google Business Profile','Otro servicio'];
 const initial={contacts:[],appointments:[],tasks:[],blocks:[],notifications:[],email:{configured:false,recipient:''},settings:{days:[1,2,3,4,5],start:9,end:17,duration:30}};
 async function api(path,method='GET',body){const response=await fetch('/api/'+path,{method,credentials:'same-origin',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});const data=await response.json();if(!response.ok){const error=new Error(data.error||'No pudimos completar la solicitud');error.status=response.status;throw error;}return data;}
 const dateLabel=value=>new Date(value).toLocaleString('es-NI',{timeZone:'America/Managua',dateStyle:'medium',timeStyle:'short'});
