@@ -1,51 +1,23 @@
-# Infinia: Supabase, blog y páginas de servicios
+# Infinia: solo Supabase
 
-Proyecto conectado: **Infinia Landing** (`gdnzpassbdavkzqbutxg`). El esquema ya se aplicó en Supabase mediante la migración `infinia_crm_blog`. El SQL retenido está en `supabase/schema.sql`; no lo ejecutes de nuevo sobre el proyecto que ya se preparó.
+El panel, las citas, el calendario, las tareas y el blog utilizan Supabase. Ya no existe selección entre D1 y Supabase: `DATA_BACKEND` no se usa.
 
-## Qué cambia
+## Activación simplificada
 
-- Base preparada para contactos, citas, bloqueos, tareas, ajustes y avisos de correo.
-- El calendario usa una restricción PostgreSQL que impide solapamientos entre citas y bloqueos, incluso con solicitudes simultáneas.
-- Blog administrable en `/panel` > Blog: borradores, publicaciones, portadas, categoría, autor, resumen, título y descripción SEO. Las imágenes admitidas son JPG, PNG y WebP de hasta 5 MB y se almacenan en Supabase Storage.
-- Páginas `/servicios`, `/servicios/paginas-web`, `/servicios/google-business-profile` y `/servicios/redes-sociales`.
-- Blog público `/blog` y `/blog/slug` servido como HTML por Pages Functions, con canonical, metadatos y datos estructurados. `/sitemap.xml` se genera con las publicaciones visibles.
-- La landing enlaza servicios y blog. Se conservan los planes, Pixel, WhatsApp, citas y zonas horarias.
+1. Mantén `SUPABASE_SECRET_KEY`, `ADMIN_PASSWORD`, `SESSION_SECRET` y las variables de Resend en Cloudflare Production. La URL de Infinia Landing ya está en el código.
+2. Para la primera copia, conserva temporalmente el vínculo `DB` de D1 y `MIGRATION_MODE=1`. La versión previa pausa las escrituras en D1 con esa variable.
+3. Despliega esta versión y entra a `/panel`. Al cargar los datos con tu sesión, se toma una copia transaccional de D1 y se importa a Supabase. Se comprueban los recuentos de contactos, citas, bloqueos, tareas y avisos. La copia es idempotente y no sobrescribe datos diferentes en el destino.
+4. En Migración verás **Supabase es la única base activa. La copia de D1 está verificada.** Las reservas ya utilizan Supabase; la variable de mantenimiento anterior deja de pausarlas después de verificar la copia.
+5. Solo entonces, en Cloudflare > Infinia > Settings > Bindings, retira el vínculo **DB**. Esto desconecta D1 del sitio; no borres la base antigua. Puedes quitar también `MIGRATION_MODE` y `DATA_BACKEND` si existe. Despliega para aplicar la configuración y verifica `/panel` y una reserva en `/cita`.
 
-No hay artículos publicados automáticamente ni resultados/testimonios inventados. Crea tus contenidos desde el editor. Se mantiene por ahora el acceso de administrador mediante `ADMIN_PASSWORD` y `SESSION_SECRET`; este cambio migra datos, no crea cuentas Supabase Auth, roles individuales ni invitaciones.
+No elimines DB antes de la primera copia: si no hay registro de migración, la aplicación se detiene para evitar perder los datos anteriores. Si hay rangos solapados o datos diferentes en Supabase, se muestra un error y D1 permanece intacta.
 
-## 1. Conectar Cloudflare con Supabase
+## Blog y servicios
 
-En Supabase > Project Settings > API Keys, copia una **secret key** del proyecto (formato `sb_secret_...`; también se admite la legacy `service_role` JWT). En Cloudflare Pages > Infinia > Settings > Variables and Secrets > **Production**, guárdala como **Secret**, con nombre:
+El blog incluye editor, borradores, categorías, portadas, autor y SEO. Las páginas `/blog`, `/blog/slug` y `/servicios` se entregan como HTML. El sitemap contiene únicamente artículos publicados. No se publican textos automáticamente. Las imágenes del bucket `blog-covers` son públicas: solo sube imágenes destinadas a difusión.
 
-`SUPABASE_SECRET_KEY`
+La sesión de administrador sigue usando las credenciales existentes. No se han creado cuentas individuales de Supabase Auth. Los avisos de correo mantienen la configuración de Resend.
 
-No la pongas en GitHub, en variables `VITE_`, ni la compartas en el chat. La clave solo la usan las funciones del servidor. La URL del proyecto ya está configurada en el código; opcionalmente puede declararse como `SUPABASE_URL`.
+## Validación
 
-Mantén el binding **DB** de D1, `ADMIN_PASSWORD`, `SESSION_SECRET` y las variables existentes de Resend. **Todavía no actives DATA_BACKEND**. Despliega el código nuevo: el CRM sigue en D1 mientras el editor de blog utiliza Supabase.
-
-No conectes un entorno de Preview a la base de producción con permisos de escritura; usa un proyecto de pruebas separado si habilitas esas variables en Preview.
-
-## 2. Copiar D1 sin perder nuevas reservas
-
-1. En Cloudflare configura **MIGRATION_MODE=1** y despliega. Esto pausa temporalmente reservas y cambios en el CRM; conserva el login, el blog y la herramienta de migración.
-2. En `/panel` > **Migración**, descarga un respaldo D1 y guárdalo. Contiene datos personales; no lo publiques ni lo agregues al repositorio.
-3. Pulsa **Copiar D1 y verificar**. La copia incluye contactos, citas, bloqueos, tareas, ajustes y avisos existentes, conservando los identificadores.
-4. Revisa los recuentos y el resultado **Copia verificada**. La importación ocurre en una transacción: un error no deja datos a medias. Si hay datos diferentes en el destino, no se sobrescriben. Los bloqueos que se solapen entre sí o con citas activas harán detener la importación; corrige esos rangos en D1 antes de repetirla.
-5. Sin reabrir las escrituras en D1, agrega **DATA_BACKEND=supabase** y cambia **MIGRATION_MODE=0**. Despliega nuevamente.
-6. Verifica contactos, tareas, horarios bloqueados y próximas citas en el panel. Reserva una cita de prueba en `/cita` y comprueba que aparece en Supabase y que el horario deja de estar disponible.
-
-Los cambios de variable requieren un despliegue de la versión más reciente. D1 queda intacta como respaldo. Si ya se aceptaron nuevas reservas en Supabase, no vuelvas directamente a D1: primero reconcilia esas reservas para evitar pérdidas o duplicados.
-
-## 3. Publicar un artículo
-
-En `/panel` > Blog, crea un artículo, completa el título y la URL, sube una portada opcional y agrega el contenido. Usa `##` para subtítulos y `-` para listas. Guarda como **Borrador** hasta revisarlo. Los borradores no se muestran en la web ni en el sitemap. Cambia a **Publicado** y guarda para hacerlo visible. Para retirarlo, vuelve a Borrador.
-
-Las portadas del bucket `blog-covers` son públicas incluso mientras el artículo es borrador: sube únicamente imágenes destinadas a difusión. La escritura de imágenes pasa por el acceso privado del panel. El contenido no admite HTML arbitrario, scripts ni iframes.
-
-La primera versión lista hasta 100 artículos en la página principal del blog; paginación, programación de publicaciones, redirecciones al cambiar slugs y edición colaborativa no están incluidas.
-
-## Seguridad y pruebas
-
-RLS habilitada en todas las tablas públicas. Solo los artículos publicados tienen acceso de lectura anónimo. Contactos, calendario, tareas, avisos y funciones de importación no tienen permisos para `anon` ni `authenticated`; el servidor verifica la sesión antes de usar su clave privilegiada. El análisis de Supabase solo indicó avisos informativos sobre tablas sin políticas, intencionalmente cerradas para uso exclusivo del servidor.
-
-Verificado: 12 pruebas Node/SQLite y de endpoints simulados, parseo JSX/CSS/JS y pruebas transaccionales en PostgreSQL sobre solapamientos, permisos y visibilidad de borradores. Los datos de prueba en PostgreSQL se revirtieron. No se accedió a los datos reales de D1 ni se enviaron correos reales. La compilación completa y la revisión visual en el despliegue de Cloudflare siguen pendientes.
+12 pruebas automáticas de acceso, migración automática, bloqueos de seguridad, HTML y publicación. Se comprobó que, con copia verificada, la aplicación funciona sin vínculo D1. La copia real y el despliegue todavía deben verificarse en el sitio: desde este entorno no hay acceso al panel de Cloudflare ni a sus secretos.
