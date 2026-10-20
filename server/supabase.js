@@ -1,3 +1,4 @@
+import {analyticsReport} from './analytics.js';
 import { canonicalDate,localDate } from './calendar.js';
 export const PROJECT_URL='https://gdnzpassbdavkzqbutxg.supabase.co';
 export async function supa(env,path,method='GET',body){
@@ -40,6 +41,7 @@ export async function supabaseAPI(context,helpers){
  await sendSupaNotice(env,notification.id).catch(()=>{});return json({ok:true,id,starts_at:start});
  }
  if(!isAdmin)return json({error:'Inicia sesión para entrar al panel.'},401);
+ if(path==='analytics'&&method==='GET'){const days=Number(url.searchParams.get('days')||30);if(![7,30,90].includes(days))return json({error:'Elige 7, 30 o 90 días.'},400);return new Response(JSON.stringify(await analyticsReport(env,days,supa)),{headers:{'Content-Type':'application/json','Cache-Control':'private, no-store'}})}
  if(path==='session')return json({ok:true});
  if(path==='dashboard'&&method==='GET'){
  const [contacts,ev,tasks,c,notifications]=await Promise.all([supa(env,'contacts?order=created_at.desc'),supa(env,'calendar_events?select=*,contacts(name,email,phone,service)&order=starts_at'),supa(env,'tasks?order=done.asc,due_date.asc,created_at.desc'),config(env),supa(env,'email_notifications?select=id,appointment_id,status,created_at&order=created_at.desc&limit=30')]);
