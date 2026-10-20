@@ -58,8 +58,8 @@ const plans = [
 
 
 const services = [
-  { icon: Target, title: 'Estrategia con dirección', text: 'Un plan de contenido alineado con tu marca, tu audiencia y los objetivos de tu negocio.', tag: '01 / Estrategia' },
-  { icon: Layers, title: 'Contenido que conecta', text: 'Posts, carruseles y reels con una línea visual consistente y mensajes que hablan a tu comunidad.', tag: '02 / Contenido' },
+  { icon: Target, title: 'Tu negocio, su propia web', text: 'Un sitio con identidad, información clara y una experiencia pensada para convertir interés en conversaciones.', tag: '01 / Páginas web' },
+  { icon: Layers, title: 'Que te encuentren en Google', text: 'Creación y optimización de tu Perfil de Empresa: servicios, horarios, fotos y datos de contacto bien organizados.', tag: '02 / Google Business Profile' },
   { icon: TrendingUp, title: 'Publicidad con intención', text: 'Gestión y optimización de Meta Ads para acercar tu propuesta a las personas adecuadas.', tag: '03 / Publicidad' },
   { icon: BarChart3, title: 'Claridad para avanzar', text: 'Calendario, seguimiento y reportes mensuales para entender lo que funciona y orientar el siguiente paso.', tag: '04 / Seguimiento' }
 ];
@@ -95,7 +95,7 @@ export default function InfiniaLanding() {
       <a className="inf-brand" href="/" aria-label="infinia, inicio"><img src="/infinia-icon.png" width="36" height="36" alt="" />infinia<span className="inf-brand-dot">✦</span></a>
       <button className="inf-menu-toggle" type="button" aria-controls="inf-menu" aria-expanded={menuOpen} aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button>
       <nav id="inf-menu" className={'inf-menu ' + (menuOpen ? 'is-open' : '')} aria-label="Navegación principal" onClick={() => setMenuOpen(false)}>
-        <a href="#servicios">Servicios</a><a href="#proceso">Proceso</a><a href="#planes">Paquetes</a><a href="#preguntas">Preguntas</a><Link to="/cita">Agendar cita</Link>
+        <Link to="/servicios">Servicios</Link><a href="/blog">Blog</a><a href="#proceso">Proceso</a><a href="#planes">Paquetes</a><a href="#preguntas">Preguntas</a><Link to="/cita">Agendar cita</Link>
         <Contact className="inf-nav-cta" name="Navegación">Hablemos <ArrowUpRight size={16} /></Contact>
       </nav>
     </div></header>
@@ -105,7 +105,7 @@ export default function InfiniaLanding() {
         <div className="inf-container inf-hero-layout">
           <div className="inf-hero-copy"><Label>Marketing digital en español</Label>
             <h1 id="hero-title">Tu marca,<br />con otra <span>dimensión.</span></h1>
-            <p className="inf-hero-sub">Estrategia, contenido y publicidad para negocios y emprendedores. Una presencia digital con identidad y un plan para crecer.</p>
+            <p className="inf-hero-sub">Páginas web, presencia en Google, contenido y publicidad. Conectamos los puntos para que tu negocio comunique mejor y dé su próximo paso.</p>
             <div className="inf-actions"><Contact className="inf-btn inf-btn-lime" name="Hero">Construyamos tu próximo paso <ArrowUpRight size={19} /></Contact><Link className="inf-text-link" to="/cita">Agendar una conversación <Calendar size={17} /></Link></div>
             <div className="inf-hero-note"><span /><span>Estrategia a tu medida. Trato directo, en español.</span></div>
           </div>
@@ -122,7 +122,7 @@ export default function InfiniaLanding() {
       <div className="inf-service-strip"><div className="inf-container"><span>Estrategia de marca</span><b aria-hidden="true">✦</b><span>Social media</span><b aria-hidden="true">✦</b><span>Meta Ads</span><b aria-hidden="true">✦</b><span>Contenido creativo</span></div></div>
       <section className="inf-section" id="servicios"><div className="inf-container">
         <div className="inf-section-head"><div><Label>Un sistema, muchas posibilidades</Label><h2>Todo conectado.<br /><span>Todo con propósito.</span></h2></div><p>Tu comunicación funciona mejor cuando la estrategia, el diseño y la publicidad avanzan juntos.</p></div>
-        <div className="inf-services">{services.map(({icon: Icon, title, text, tag}, i) => <article className={'inf-service inf-service-' + i} key={title}><span className="inf-tag">{tag}</span><Icon className="inf-service-icon" size={30} /><h3>{title}</h3><p>{text}</p><span className="inf-service-arrow" aria-hidden="true"><ArrowUpRight size={22} /></span></article>)}</div>
+        <div className="inf-services">{services.map(({icon: Icon, title, text, tag}, i) => <article className={'inf-service inf-service-' + i} key={title}><span className="inf-tag">{tag}</span><Icon className="inf-service-icon" size={30} /><h3>{title}</h3><p>{text}</p><a className="inf-service-link" href={i===0?"/servicios/paginas-web":i===1?"/servicios/google-business-profile":"/servicios/redes-sociales"}>Conocer el servicio ↗</a><span className="inf-service-arrow" aria-hidden="true"><ArrowUpRight size={22} /></span></article>)}</div>
       </div></section>
       <section className="inf-section inf-process-section" id="proceso"><div className="inf-container"><Label>De la idea a la acción</Label><h2>Un siguiente paso.<br /><span>Sin complicaciones.</span></h2><div className="inf-process">
         {[['01','Conocemos tu negocio','Hablamos de tu marca, tus objetivos y el punto desde el que comienzas.'],['02','Diseñamos la dirección','Preparamos una propuesta con alcance, entregables y una estrategia ajustada a tu etapa.'],['03','Creamos y medimos','Organizamos el contenido, gestionamos la publicidad y revisamos los resultados para ajustar.']].map(([n,t,d]) => <article key={n}><span className="inf-step">{n}</span><h3>{t}</h3><p>{d}</p></article>)}
@@ -136,10 +136,9 @@ export default function InfiniaLanding() {
         </article>;})}</div><p className="inf-plan-footnote">El alcance y la inversión se detallan en tu propuesta antes de comenzar.</p>
       </div></section>
       <section className="inf-section inf-faq-section" id="preguntas"><div className="inf-container inf-faq-layout"><div><Label>Hablemos claro</Label><h2>Buenas preguntas.<br /><span>Respuestas directas.</span></h2><p>Si tu negocio necesita algo diferente, conversemos sobre una propuesta a tu medida.</p><Contact className="inf-text-link" name="Preguntas">Cuéntanos tu idea <ArrowUpRight size={18} /></Contact></div><div className="inf-faq">{faqs.map(item => <details key={item.q}><summary>{item.q}<ChevronDown size={19} /></summary><p>{item.a}</p></details>)}</div></div></section>
-      <section className="inf-section inf-contact-section" id="contacto"><div className="inf-container"><div className="inf-contact"><Label>El próximo capítulo de tu marca</Label><h2>Hagamos espacio<br />para <span>lo que viene.</span></h2><p>Cuéntanos dónde estás y hacia dónde quieres llevar tu negocio. La siguiente idea comienza con una conversación.</p><div className="inf-actions"><Contact className="inf-btn inf-btn-lime" name="Contacto final"><MessageCircle size={19} />Hablemos por WhatsApp <ArrowUpRight size={18} /></Contact><a className="inf-text-link" href={'mailto:' + EMAIL} onClick={() => trackContact('Correo')}><Mail size={17} />{EMAIL}</a></div></div></div></section>
+      <section className="inf-section inf-journal"><div className="inf-container"><Label>Infinia Journal</Label><div className="inf-section-head"><div><h2>Ideas para tu<br /><span>próximo paso.</span></h2></div><p>Un espacio para explorar páginas web, presencia en Google y marketing con una mirada práctica.</p></div><a className="inf-btn inf-btn-outline" href="/blog">Explorar el blog <ArrowUpRight size={18} /></a></div></section><section className="inf-section inf-contact-section" id="contacto"><div className="inf-container"><div className="inf-contact"><Label>El próximo capítulo de tu marca</Label><h2>Hagamos espacio<br />para <span>lo que viene.</span></h2><p>Cuéntanos dónde estás y hacia dónde quieres llevar tu negocio. La siguiente idea comienza con una conversación.</p><div className="inf-actions"><Contact className="inf-btn inf-btn-lime" name="Contacto final"><MessageCircle size={19} />Hablemos por WhatsApp <ArrowUpRight size={18} /></Contact><a className="inf-text-link" href={'mailto:' + EMAIL} onClick={() => trackContact('Correo')}><Mail size={17} />{EMAIL}</a></div></div></div></section>
     </main>
     <footer className="inf-footer"><div className="inf-container"><div className="inf-footer-top"><a className="inf-brand" href="/">infinia<span className="inf-brand-dot">✦</span></a><p>Ideas con dirección.<br />Marcas con dimensión.</p><a className="inf-text-link" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">@beinfinia_ <ArrowUpRight size={17} /></a></div><div className="inf-footer-bottom"><span>© {new Date().getFullYear()} infinia</span><span>Marketing digital en español</span><Link to="/politica-de-privacidad">Política de privacidad</Link></div></div></footer>
     <Contact className="inf-floating" name="WhatsApp flotante"><MessageCircle size={23} /><span className="inf-sr-only">Contactar por WhatsApp</span></Contact>
   </div>;
 }
-
