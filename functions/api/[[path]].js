@@ -1,3 +1,5 @@
+import {supabaseAPI} from '../../server/supabase.js';
+import {blogAPI} from '../../server/blog-api.js';
 import { localDate, canonicalDate, occupiedSlots, slotAvailable, emailStatement, emailReady, deliverNotification } from '../../server/calendar.js';
 const stages = ['Nuevo','Contactado','Cita agendada','Propuesta enviada','Ganado','Perdido'];
 const encoder = new TextEncoder();
@@ -9,7 +11,7 @@ async function authorized(request,env) {const token=(request.headers.get('Cookie
 const cookie = value => `infinia_session=${value}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`;
 async function settings(db) {return JSON.parse((await db.prepare('SELECT data FROM settings WHERE id=1').first()).data);}
 function slotsFor(date,config) {if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return [];const day=new Date(date+'T12:00:00-06:00');if(!Number.isFinite(day.getTime()) || day.toISOString().slice(0,10)!==date || !config.days.includes(day.getUTCDay()))return [];const slots=[];for(let m=config.start*60;m+config.duration<=config.end*60;m+=config.duration){const iso=new Date(`${date}T${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:00-06:00`).toISOString();if(new Date(iso).getTime()>Date.now()+3600000 && new Date(iso).getTime()<Date.now()+90*86400000)slots.push(iso);}return slots;}
-export async function onRequest({request,env,params}) {
+async function legacyRequest({request,env,params}) {
  try {
   if(!env.DB || !env.ADMIN_PASSWORD || !env.SESSION_SECRET)return json({error:'La agenda aún no está activada. Falta configurar la base de datos y el acceso en Cloudflare.'},503);
   const path=Array.isArray(params.path)?params.path.join('/'):params.path||'';const method=request.method;const url=new URL(request.url);
@@ -82,4 +84,13 @@ export async function onRequest({request,env,params}) {
   if(path==='settings' && method==='PUT'){const config={days:body.days,start:Number(body.start),end:Number(body.end),duration:Number(body.duration),timezone:'America/Managua'};if(!Array.isArray(config.days)||!config.days.length||config.days.some(d=>!Number.isInteger(d)||d<0||d>6)||!Number.isInteger(config.start)||!Number.isInteger(config.end)||config.start<0||config.end>24||config.start>=config.end||![15,30,60].includes(config.duration))return json({error:'Revisa los horarios.'},400);await env.DB.prepare('UPDATE settings SET data=? WHERE id=1').bind(JSON.stringify(config)).run();return json({ok:true});}
   return json({error:'Ruta no disponible'},404);
  } catch(error) {if(String(error).includes('no such table: calendar_blocks')||String(error).includes('no such table: email_notifications'))return json({error:'Actualiza D1 ejecutando database/migrations/002_calendar.sql y vuelve a intentar.'},503);if(String(error).includes('BLOCK_HAS_APPOINTMENTS'))return json({error:'Hay citas en ese rango. Reprográmalas o cancélalas antes de bloquear.'},409);if(String(error).includes('BLOCK_CONFLICT'))return json({error:'Ese horario está bloqueado. Elige otro.'},409);if(String(error).includes('SLOT_CONFLICT')||String(error).includes('UNIQUE constraint failed: appointments'))return json({error:'Ese horario coincide con otra cita. Elige otro estado u horario.'},409);return json({error:'No pudimos completar la operación. Revisa la configuración o vuelve a intentar.'},500);}
+}
+
+export async function onRequest(context){
+ const path=Array.isArray(context.params.path)?context.params.path.join('/'):context.params.path||'';
+ const helpers={authorized,signature,json,clean,cookie,slotsFor};
+ if(context.env.MIGRATION_MODE==='1'&&context.request.method!=='GET'&&!['login','logout'].includes(path)&&!path.startsWith('migration/')&&!path.startsWith('blog/'))return json({error:'Estamos actualizando la agenda. Intenta nuevamente en unos minutos.'},503);
+ if(path.startsWith('blog/')||path.startsWith('migration/'))return blogAPI(context,helpers);
+ if(context.env.DATA_BACKEND==='supabase')return supabaseAPI(context,helpers);
+ return legacyRequest(context);
 }
