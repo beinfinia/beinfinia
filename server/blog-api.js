@@ -1,5 +1,5 @@
 import {migrationState,migrateD1} from './migrate.js';
-import {supa,PROJECT_URL} from './supabase.js';
+import {supa,PROJECT_URL,supabaseFailure} from './supabase.js';
 export async function blogAPI({request,env,params},{authorized,json,clean}) {
  try{
  const path=Array.isArray(params.path)?params.path.join('/'):params.path||'';const method=request.method;
@@ -39,5 +39,5 @@ export async function blogAPI({request,env,params},{authorized,json,clean}) {
  const result=await migrateD1(env);return json({ok:true,result,message:'Supabase es la única base activa. La copia de D1 está verificada.'});
  }
  return json({error:'Ruta no disponible'},404);
- }catch(e){return json({error:e.message.includes('PAUSE_D1_FIRST')?'Activa MIGRATION_MODE=1 antes de copiar D1.':e.message.includes('MISSING_D1_BACKUP')?'Conserva el vínculo DB de D1 hasta verificar la copia.':e.message.includes('TARGET_NOT_EMPTY')?'Supabase ya tiene datos diferentes. No se ha sobrescrito nada. Revisa la migración.':e.code==='23P01'?'Hay horarios superpuestos en los datos de origen. La copia se canceló sin cambios.':e.code==='23505'?'Esa URL ya existe. Elige otra.':'No se pudo completar la operación. Revisa Supabase y vuelve a intentar.'},409)}
+ }catch(e){return json({error:supabaseFailure(e)||(e.message.includes('PAUSE_D1_FIRST')?'Activa MIGRATION_MODE=1 antes de copiar D1.':e.message.includes('MISSING_D1_BACKUP')?'Conserva el vínculo DB de D1 hasta verificar la copia.':e.message.includes('TARGET_NOT_EMPTY')?'Supabase ya tiene datos diferentes. No se ha sobrescrito nada. Revisa la migración.':e.code==='23P01'?'Hay horarios superpuestos en los datos de origen. La copia se canceló sin cambios.':e.code==='23505'?'Esa URL ya existe. Elige otra.':'No se pudo completar la operación. Revisa Supabase y vuelve a intentar.')},409)}
 }
