@@ -1,4 +1,4 @@
-import {supabaseAPI} from '../../server/supabase.js';
+import {supabaseAPI,supabaseFailure} from '../../server/supabase.js';
 import {blogAPI} from '../../server/blog-api.js';
 import {migrationState,migrateD1} from '../../server/migrate.js';
 const encoder=new TextEncoder();
@@ -24,7 +24,7 @@ export async function onRequest(context){
    await migrateD1(env);
   }
  }catch(e){
-  const message=e.message.includes('PAUSE_D1_FIRST')?'Activa MIGRATION_MODE=1 y despliega una vez para copiar D1 automáticamente al entrar al panel.':e.message.includes('MISSING_D1_BACKUP')?'Conserva el vínculo DB de D1 hasta terminar la copia de datos.':e.message.includes('TARGET_NOT_EMPTY')?'Supabase contiene datos diferentes. No se ha sobrescrito nada; revisa la migración.':'La copia automática no pudo verificarse. D1 sigue intacta. Revisa la migración antes de desconectarla.';
+  const message=supabaseFailure(e)||(e.message.includes('PAUSE_D1_FIRST')?'Activa MIGRATION_MODE=1 y despliega una vez para copiar D1 automáticamente al entrar al panel.':e.message.includes('MISSING_D1_BACKUP')?'Conserva el vínculo DB de D1 hasta terminar la copia de datos.':e.message.includes('TARGET_NOT_EMPTY')?'Supabase contiene datos diferentes. No se ha sobrescrito nada; revisa la migración.':'La copia automática no pudo verificarse. D1 sigue intacta. Revisa la migración antes de desconectarla.');
   return json({error:message},503);
  }
  return supabaseAPI(context,helpers);
