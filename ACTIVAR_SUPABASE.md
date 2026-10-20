@@ -1,23 +1,22 @@
-# Infinia: solo Supabase
+# Infinia: inicio nuevo en Supabase
 
-El panel, las citas, el calendario, las tareas y el blog utilizan Supabase. Ya no existe selección entre D1 y Supabase: `DATA_BACKEND` no se usa.
+Por decisión del propietario, Infinia empieza sin importar contactos, citas ni tareas de D1. Se confirmó que Supabase no contenía datos en esas tablas ni artículos. La base antigua de D1 no se borra.
 
-## Activación simplificada
+## Configuración
 
-1. Mantén `SUPABASE_SECRET_KEY`, `ADMIN_PASSWORD`, `SESSION_SECRET` y las variables de Resend en Cloudflare Production. La URL de Infinia Landing ya está en el código.
-2. Para la primera copia, conserva temporalmente el vínculo `DB` de D1 y `MIGRATION_MODE=1`. La versión previa pausa las escrituras en D1 con esa variable.
-3. Despliega esta versión y entra a `/panel`. Al cargar los datos con tu sesión, se toma una copia transaccional de D1 y se importa a Supabase. Se comprueban los recuentos de contactos, citas, bloqueos, tareas y avisos. La copia es idempotente y no sobrescribe datos diferentes en el destino.
-4. En Migración verás **Supabase es la única base activa. La copia de D1 está verificada.** Las reservas ya utilizan Supabase; la variable de mantenimiento anterior deja de pausarlas después de verificar la copia.
-5. Solo entonces, en Cloudflare > Infinia > Settings > Bindings, retira el vínculo **DB**. Esto desconecta D1 del sitio; no borres la base antigua. Puedes quitar también `MIGRATION_MODE` y `DATA_BACKEND` si existe. Despliega para aplicar la configuración y verifica `/panel` y una reserva en `/cita`.
+Conserva en Cloudflare Production:
+- `SUPABASE_SECRET_KEY`: Secret key del proyecto Infinia Landing; solo del lado del servidor.
+- `ADMIN_PASSWORD` y `SESSION_SECRET`: acceso privado existente.
+- Variables de Resend si quieres recibir avisos.
 
-No elimines DB antes de la primera copia: si no hay registro de migración, la aplicación se detiene para evitar perder los datos anteriores. Si hay rangos solapados o datos diferentes en Supabase, se muestra un error y D1 permanece intacta.
+Después de desplegar este código:
+1. En Cloudflare > Infinia > Settings > Bindings, retira el vínculo `DB`. No elimines la base D1: puede conservarse como respaldo independiente.
+2. Elimina `MIGRATION_MODE` y `DATA_BACKEND` si existen. Ya no se utilizan ni afectan la agenda.
+3. Despliega nuevamente para aplicar la configuración.
+4. Abre `/panel` y comprueba Contactos, Calendario, Tareas y Blog. No hay sección Migración ni obligación de copiar datos antiguos.
 
-## Blog y servicios
+El CRM y las reservas usan directamente Supabase. El blog y las portadas también se guardan en Supabase; Cloudflare continúa alojando la web. Los datos personales y borradores están protegidos, y solo los artículos publicados tienen acceso público.
 
-El blog incluye editor, borradores, categorías, portadas, autor y SEO. Las páginas `/blog`, `/blog/slug` y `/servicios` se entregan como HTML. El sitemap contiene únicamente artículos publicados. No se publican textos automáticamente. Las imágenes del bucket `blog-covers` son públicas: solo sube imágenes destinadas a difusión.
+El acceso de administrador conserva la contraseña actual. No se han creado usuarios individuales de Supabase Auth ni cambiado las credenciales del propietario.
 
-La sesión de administrador sigue usando las credenciales existentes. No se han creado cuentas individuales de Supabase Auth. Los avisos de correo mantienen la configuración de Resend.
-
-## Validación
-
-12 pruebas automáticas de acceso, migración automática, bloqueos de seguridad, HTML y publicación. Se comprobó que, con copia verificada, la aplicación funciona sin vínculo D1. La copia real y el despliegue todavía deben verificarse en el sitio: desde este entorno no hay acceso al panel de Cloudflare ni a sus secretos.
+Si el panel muestra un error de conexión, ahora diferencia clave rechazada, permisos insuficientes, tablas ausentes y fallos de red, sin exponer claves.

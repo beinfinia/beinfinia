@@ -1,7 +1,9 @@
 import { canonicalDate,localDate } from './calendar.js';
 export const PROJECT_URL='https://gdnzpassbdavkzqbutxg.supabase.co';
 export async function supa(env,path,method='GET',body){
- const response=await fetch((env.SUPABASE_URL||PROJECT_URL)+'/rest/v1/'+path,{method,headers:{apikey:env.SUPABASE_SECRET_KEY,...(env.SUPABASE_SECRET_KEY.startsWith('eyJ')?{Authorization:'Bearer '+env.SUPABASE_SECRET_KEY}:{}),'Content-Type':'application/json',Prefer:'return=representation'},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
+ const key=String(env.SUPABASE_SECRET_KEY||'').trim();
+ if(!key||key.startsWith('sb_publishable_')){const e=new Error('SERVER_KEY_REQUIRED');e.code='SERVER_KEY_REQUIRED';throw e}
+ const response=await fetch((env.SUPABASE_URL||PROJECT_URL).trim()+'/rest/v1/'+path,{method,headers:{apikey:key,...(key.startsWith('eyJ')?{Authorization:'Bearer '+key}:{}),'Content-Type':'application/json',Prefer:'return=representation'},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
  const data=await response.json().catch(()=>null);if(!response.ok){const e=new Error(data?.message||'SUPABASE_ERROR');e.code=data?.code;e.status=response.status;throw e}return data;
 }
 export const rpc=(env,name,data)=>supa(env,'rpc/'+name,'POST',data);
@@ -65,5 +67,15 @@ export async function supabaseAPI(context,helpers){
  if(path==='settings'&&method==='PUT'){const c={days:b.days,start:Number(b.start),end:Number(b.end),duration:Number(b.duration),timezone:'America/Managua'};if(!Array.isArray(c.days)||!c.days.length||c.days.some(d=>!Number.isInteger(d)||d<0||d>6)||!Number.isInteger(c.start)||!Number.isInteger(c.end)||c.start<0||c.end>24||c.start>=c.end||![15,30,60].includes(c.duration))return json({error:'Revisa los horarios.'},400);await supa(env,'settings?id=eq.1','PATCH',{data:c});return json({ok:true})}
  if(path.startsWith('notifications/')&&method==='POST')return json({ok:true,notification:await sendSupaNotice(env,path.split('/')[1])});
  return json({error:'Ruta no disponible'},404);
- }catch(e){if(e.code==='23P01'||e.message.includes('STALE_APPOINTMENT'))return json({error:'El horario está ocupado o cambió. Actualiza la agenda y elige otro.'},409);return json({error:'No pudimos completar la operación en Supabase. Revisa la configuración e inténtalo otra vez.'},e.code==='23514'?400:500)}
+ }catch(e){if(e.code==='23P01'||e.message.includes('STALE_APPOINTMENT'))return json({error:'El horario está ocupado o cambió. Actualiza la agenda y elige otro.'},409);return json({error:supabaseFailure(e)||'No pudimos completar la operación en Supabase. Revisa la configuración e inténtalo otra vez.'},e.code==='23514'?400:500)}
+}
+
+export function supabaseFailure(error){
+ if(error.code==='SERVER_KEY_REQUIRED')return 'La clave guardada debe ser una Secret key de Infinia Landing, no una Publishable key. Revisa SUPABASE_SECRET_KEY en Cloudflare.';
+ if(error.status===401)return 'Supabase rechazó la clave (401). Vuelve a guardar la Secret key del proyecto Infinia Landing en SUPABASE_SECRET_KEY y despliega de nuevo.';
+ if(error.status===403||error.code==='42501')return 'La clave no tiene permisos de servidor (403). Usa una Secret key o la legacy service_role del proyecto Infinia Landing.';
+ if(error.code==='PGRST205'||error.code==='42P01')return 'No se encontró la tabla de Supabase. Comprueba que la clave corresponda a Infinia Landing.';
+ if(error.name==='TimeoutError'||error.name==='AbortError')return 'La conexión con Supabase agotó el tiempo de espera. Intenta nuevamente.';
+ if(error.name==='TypeError')return 'No se pudo abrir la conexión con Supabase. Revisa la URL y que la clave esté completa, sin comillas.';
+ return error.status?'Supabase respondió con error HTTP '+error.status+(error.code?' ('+String(error.code).replace(/[^A-Z0-9_]/g,'')+')':'')+'. Comparte este mensaje para revisarlo.':null;
 }
