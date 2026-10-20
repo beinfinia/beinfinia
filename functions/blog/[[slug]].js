@@ -3,6 +3,8 @@ import {page,html,escapeHTML as e,markdown,origin} from '../../server/site-html.
 const when=value=>new Date(value).toLocaleDateString('es-NI',{year:'numeric',month:'long',day:'numeric',timeZone:'America/Managua'});
 export async function onRequestGet({env,params,request}){
  const slug=Array.isArray(params.slug)?params.slug.join('/'):params.slug||'';
+ const redirects={'pagina-web-negocio-nicaragua':'pagina-web-para-negocios','perfil-negocio-google-nicaragua':'perfil-negocio-google-guia'};
+ if(redirects[slug])return Response.redirect(new URL('/blog/'+redirects[slug],request.url),301);
  try{
  if(!env.SUPABASE_SECRET_KEY)return html(page({title:'Blog | Infinia',description:'Ideas para hacer crecer la presencia digital de tu negocio.',path:'/blog',body:'<section class="hero"><span class="eyebrow">INFINIA JOURNAL</span><h1>Ideas que abren<br><em>otra dimensión.</em></h1><p>Pronto compartiremos nuestra primera colección de artículos.</p><a class="button" href="/cita">Conversemos ↗</a></section>'}));
  if(slug){
