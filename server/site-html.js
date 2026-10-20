@@ -3,6 +3,7 @@ const gtmBody="<!-- Google Tag Manager (noscript) --><noscript><iframe src=\"htt
 export const origin='https://www.beinfinia.com';
 export const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeImage=url=>/^https:\/\/[^\s<>"']+$/.test(url)||/^\/(?!\/)[a-zA-Z0-9_./-]+$/.test(url);
+function inline(text){let result='',last=0;const pattern=/\[([^\]\n]+)\]\(([^\s)]+)\)/g;for(const match of text.matchAll(pattern)){result+=escapeHTML(text.slice(last,match.index));const url=match[2];result+=safeImage(url)?'<a href="'+escapeHTML(url)+'">'+escapeHTML(match[1])+'</a>':escapeHTML(match[0]);last=match.index+match[0].length}return result+escapeHTML(text.slice(last))}
 export function markdown(text){return String(text||'').split(/\n\s*\n/).map(block=>{
 const s=block.trim();if(!s)return '';
 const image=s.match(/^!\[([^\]\n]*)\]\(([^\s)]+)\)(?:\n(.+))?$/);
@@ -12,7 +13,7 @@ if(card){const symbols={idea:'✦',check:'✓',plan:'↗'};return '<aside class=
 if(s==='---')return '<hr class="journal-divider">';
 if(s.startsWith('## '))return '<h2>'+escapeHTML(s.slice(3))+'</h2>';
 if(s.startsWith('# '))return '<h2>'+escapeHTML(s.slice(2))+'</h2>';
-if(s.split('\n').every(l=>l.startsWith('- ')))return '<ul>'+s.split('\n').map(l=>'<li>'+escapeHTML(l.slice(2))+'</li>').join('')+'</ul>';
-return '<p>'+escapeHTML(s).replaceAll('\n','<br>')+'</p>'}).join('')}
+if(s.split('\n').every(l=>l.startsWith('- ')))return '<ul>'+s.split('\n').map(l=>'<li>'+inline(l.slice(2))+'</li>').join('')+'</ul>';
+return '<p>'+inline(s).replaceAll('\n','<br>')+'</p>'}).join('')}
 export function page({title,description,path,body,image='',schema,robots='index, follow'}){return '<!doctype html><html lang="es"><head>'+gtmHead+'<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escapeHTML(title)+'</title><meta name="description" content="'+escapeHTML(description)+'"><meta name="robots" content="'+robots+'"><link rel="canonical" href="'+origin+path+'"><link rel="icon" href="/favicon-32.png"><link rel="stylesheet" href="/editorial.css"><meta property="og:title" content="'+escapeHTML(title)+'"><meta property="og:description" content="'+escapeHTML(description)+'"><meta property="og:url" content="'+origin+path+'"><meta property="og:type" content="'+(schema?'article':'website')+'">'+(image?'<meta property="og:image" content="'+escapeHTML(image)+'">':'')+(schema?'<script type="application/ld+json">'+JSON.stringify(schema).replaceAll('<','\\u003c')+'</script>':'')+'</head><body'+(path==='/blog'||path.startsWith('/blog/')?' class="blog-light"':'')+'>'+gtmBody+'<a class="skip" href="#contenido">Saltar al contenido</a><header class="site-nav"><a class="brand" href="/">infinia<span>✦</span></a><nav aria-label="Navegación"><a href="/servicios">Servicios</a><a href="/blog">Blog</a><a class="button" href="/cita">Agendar conversación ↗</a></nav></header><main id="contenido">'+body+'</main><footer><a class="brand" href="/">infinia<span>✦</span></a><span>Ideas con dirección. Marcas con dimensión.</span><a href="/politica-de-privacidad">Privacidad</a></footer></body></html>'}
 export const html=(text,status=200,privatePage=false)=>new Response(text,{status,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':privatePage?'private, no-store':'public, max-age=0, must-revalidate',...(privatePage?{'X-Robots-Tag':'noindex, nofollow'}:{})}});
