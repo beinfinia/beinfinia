@@ -1,4 +1,5 @@
-import {supa,rpc,PROJECT_URL} from './supabase.js';
+import {migrationState,migrateD1} from './migrate.js';
+import {supa,PROJECT_URL} from './supabase.js';
 export async function blogAPI({request,env,params},{authorized,json,clean}) {
  try{
  const path=Array.isArray(params.path)?params.path.join('/'):params.path||'';const method=request.method;
@@ -25,7 +26,8 @@ export async function blogAPI({request,env,params},{authorized,json,clean}) {
  const rows=await supa(env,'blog_posts'+(b.id?'?id=eq.'+encodeURIComponent(b.id):''),b.id?'PATCH':'POST',post);return json({ok:true,post:rows[0]});
  }
  if(path==='migration/status'){
- return json({backend:env.DATA_BACKEND==='supabase'?'supabase':'d1',ready:Boolean(env.SUPABASE_SECRET_KEY),receipts:await supa(env,'migration_receipts?select=result,created_at&order=created_at.desc&limit=1')});
+ const state=await migrationState(env);
+ return json({backend:'supabase',ready:Boolean(env.SUPABASE_SECRET_KEY),receipts:state?[state]:[],migration_pending:!state});
  }
  if(path==='migration/export'&&method==='GET'){
  if(!env.DB)return json({error:'D1 no está vinculada.'},503);
@@ -34,16 +36,8 @@ export async function blogAPI({request,env,params},{authorized,json,clean}) {
  return new Response(JSON.stringify(Object.fromEntries(tables.map((table,i)=>[table,results[i].results])),null,2),{headers:{'Content-Type':'application/json','Content-Disposition':'attachment; filename="infinia-d1-backup.json"','Cache-Control':'no-store'}});
  }
  if(path==='migration/run'&&method==='POST'){
- if(env.MIGRATION_MODE!=='1')return json({error:'Primero activa MIGRATION_MODE=1 y despliega para evitar cambios durante la copia.'},409);
- if(env.DATA_BACKEND==='supabase')return json({error:'La migración solo se permite antes de activar Supabase.'},409);
- if(!env.DB)return json({error:'Mantén el binding DB de D1 para copiar los datos.'},503);
- const [contacts,appointments,tasks,blocks,notifications,settings]=await Promise.all(['contacts','appointments','tasks','calendar_blocks','email_notifications','settings'].map(table=>env.DB.prepare('SELECT * FROM '+table).all()));
- const payload={contacts:contacts.results,appointments:appointments.results,tasks:tasks.results,blocks:blocks.results,notifications:notifications.results.map(n=>({...n,payload:JSON.parse(n.payload)})),settings:JSON.parse(settings.results[0].data)};
- // One PostgreSQL transaction imports the snapshot; any conflict rolls everything back.
- const result=await rpc(env,'infinia_import',{p_data:payload});
- for(const key of ['contacts','appointments','tasks','blocks','notifications'])if(result[key]!==payload[key].length)throw Error('Count mismatch');
- return json({ok:true,result,message:'Copia verificada. Detén las reservas durante el cambio y activa DATA_BACKEND=supabase.'});
+ const result=await migrateD1(env);return json({ok:true,result,message:'Supabase es la única base activa. La copia de D1 está verificada.'});
  }
  return json({error:'Ruta no disponible'},404);
- }catch(e){return json({error:e.message.includes('TARGET_NOT_EMPTY')?'Supabase ya tiene datos diferentes. No se ha sobrescrito nada. Revisa la migración.':e.code==='23P01'?'Hay horarios superpuestos en los datos de origen. La copia se canceló sin cambios.':e.code==='23505'?'Esa URL ya existe. Elige otra.':'No se pudo completar la operación. Revisa Supabase y vuelve a intentar.'},409)}
+ }catch(e){return json({error:e.message.includes('PAUSE_D1_FIRST')?'Activa MIGRATION_MODE=1 antes de copiar D1.':e.message.includes('MISSING_D1_BACKUP')?'Conserva el vínculo DB de D1 hasta verificar la copia.':e.message.includes('TARGET_NOT_EMPTY')?'Supabase ya tiene datos diferentes. No se ha sobrescrito nada. Revisa la migración.':e.code==='23P01'?'Hay horarios superpuestos en los datos de origen. La copia se canceló sin cambios.':e.code==='23505'?'Esa URL ya existe. Elige otra.':'No se pudo completar la operación. Revisa Supabase y vuelve a intentar.'},409)}
 }
