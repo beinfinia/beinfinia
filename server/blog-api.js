@@ -17,7 +17,7 @@ export async function blogAPI({request,env,params},{authorized,json,clean}) {
  const b=await request.json(),title=clean(b.title,160),slug=clean(b.slug,160),status=b.status==='published'?'published':'draft';
  if(!title||!slug||!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug))return json({error:'Escribe el título y una URL con letras minúsculas, números y guiones.'},400);
  if(status==='published'&&clean(b.content,100000).length<100)return json({error:'Completa el artículo antes de publicarlo.'},400);
- const cover=clean(b.cover_url,1000);if(cover&&!cover.startsWith((env.SUPABASE_URL||PROJECT_URL)+'/storage/v1/object/public/blog-covers/'))return json({error:'Sube la portada desde el editor.'},400);
+ const cover=clean(b.cover_url,1000);if(cover&&cover!=='/images/ia-2026-cover.svg'&&!cover.startsWith((env.SUPABASE_URL||PROJECT_URL)+'/storage/v1/object/public/blog-covers/'))return json({error:'Sube la portada desde el editor.'},400);
  const post={title,slug,status,excerpt:clean(b.excerpt,300),content:clean(b.content,100000),category:clean(b.category,80)||'Estrategia',author:clean(b.author,100)||'Equipo Infinia',cover_url:cover,seo_title:clean(b.seo_title,160),seo_description:clean(b.seo_description,300),updated_at:new Date().toISOString()};
  let previous=null;if(b.id)previous=(await supa(env,'blog_posts?id=eq.'+encodeURIComponent(b.id)))[0];
  if(b.id&&!previous)return json({error:'Artículo no encontrado'},404);
